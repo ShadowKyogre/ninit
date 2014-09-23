@@ -1,0 +1,108 @@
+.TH ninit-runlevel 8 "Jan 16, 2010"
+.SH NAME
+ninit-runlevel 
+\- set runlevels for compatibility with SysVinit
+.SH SYNOPSIS
+.B ninit-runlevel
+.B LEVEL
+[OPTION]... [-] [NAME=VALUE]... [PROGRAM [ARG]...]
+.br
+.B ninit-runlevel
+.
+.SH DESCRIPTION
+.B ninit-runlevel
+is a helper program to start service (script, program) with the same
+environ as SysVinit.  It also modifies the files
+.I /var/run/utmp
+and
+.I /var/log/wtmp
+writing runlevel records in them.  
+It is used mainly in ninit-inittab(8) output script.
+
+It sets the following variables:
+INIT_VERSION=2.86,
+CONSOLE=/dev/console,
+RUNLEVEL,
+PREVLEVEL,
+PATH=/bin:/usr/bin:/sbin:/usr/sbin.
+The variable NINIT_RUNLEVEL always has the same value
+as RUNLEVEL.
+The program does not modify or reset the variable INIT_HALT.
+
+.SH OPTIONS
+Actually  
+.B ninit\-runlevel
+has the same syntax between 
+.B LEVEL
+and
+.B PROGRAM
+as the command env(1).
+
+If 
+.B ninit-runlevel
+is started as a service you can use 
+.I environ 
+file 
+to set some environment variables.
+However in this case 
+.B ninit-runlevel
+overwrites the variables:
+INIT_VERSION,
+CONSOLE,
+RUNLEVEL,
+PREVLEVEL,
+PATH
+and NINIT_RUNLEVEL.
+You can reset some of them, for example PATH.
+.TP
+\-i
+start with an empty environment
+.br
+a mere - implies -i
+.TP
+\-u 
+.I variable
+.br
+remove the
+.I variable 
+from the environment
+
+.SH "EXAMPLES"
+In the next examples we modify PATH, INIT_HALT and CONSOLE
+
+.B ninit-runlevel S 
+PATH=/sbin:/bin /etc/rc.d/rc.single
+.br
+.B ninit-runlevel 0 
+INIT_HALT=POWERDOWN -u CONSOLE /etc/rc.d/rc.halt
+
+See the environ with (don't start it as root \-
+the program will then modify 
+.I /var/run/utmp
+)
+
+.B ninit-runlevel 5
+/usr/bin/env
+
+.SH WARNING
+Don't remove the file 
+. I /var/run/utmp
+if you want correct PREVLEVEL and RUNLEVEL variables.
+.B ninit-runlevel
+stores the info about levels there.
+.B ninit 
+does not use the
+.I  /var/run/utmp
+file, nor PREVLEVEL, RUNLEVEL, NINIT_RUNLEVEL.
+
+.SH "FILES"
+.I /var/run/utmp
+.br
+.I /var/log/wtmp
+
+.SH "SEE ALSO"
+utmp(5), env(1), runlevel(8)
+.br
+ninit(8), ninit\-sysvinit(8), ninit\-shutdown(8), ninit\-inittab(8)
+.br
+init(1), shutdown(8), reboot(8), halt(8)

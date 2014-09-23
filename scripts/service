@@ -1,0 +1,104 @@
+#!/bin/sh
+
+if test -z "$1" ; then
+  printf "%s\n\n" '
+usage:   ninit-service [-Options] service(s)
+usage:   ninit-service -E service file
+
+Options:
+  -A ascii output
+  -C show end of lines;  for cat
+  -L long lines;  for ls
+  -E edit file;  default editor: /bin/vi;  change it with: 
+     echo /usr/bin/emacs -nw > /etc/ninit/.editor
+  -H/other/home   default home: /etc/ninit
+
+example: ninit-service `find /etc/ninit/ -type d`'
+  exit 1
+fi
+
+ lsopt=
+catopt=
+  home="/etc/ninit"
+editor="/bin/vi"
+cstart="\033\133\061\073\063\065\155"
+  cend="\033\133\060\073\063\071\155"
+
+
+while true ; do
+  case $1 in
+    -E) shift;
+	[ -f $home/.editor ] && editor=`head -1 $home/.editor`
+        [ -z "$editor" ] && editor='/bin/vi'
+	test $# -ge 2 && exec $editor $home/$1/$2 
+      	continue;;
+    -C*) catopt=-E ; shift; continue;;
+    -L*) lsopt=-l; shift; continue;;
+    -H*) home=`echo $1 | sed -e 's/^..//'`; shift; continue;;
+    -A*) cstart=""; cend="";  shift; continue;;
+    *) break ;;
+  esac
+done
+
+while true; do
+
+cd $home || exit 1
+[ -z "$1" ] && exit 0
+
+if ! cd $1 2>/dev/null ; then
+  printf "\n\n*** WARNING ***\t$cstart%s$cend is not a service\n\n" $1
+  shift
+  continue
+fi
+
+printf "\n\tservice: $cstart%s$cend\n" $1
+
+if [ -d log -a ! -p log/in ] ; then
+   printf "\n*** WARNING ***  %s$cstart%s$cend %s\n" \
+          "you have not a FIFO " "log/in"
+   printf "%s\n\011%s\n\011%s\n\n" "create it with:" \
+          "cd $home/$1" "mkfifo -m 600 log/in  &&  ln -s log/in out"
+fi
+
+ls -F $lsopt
+printf "\n"
+
+#### links
+for f in in out log run end; do
+  [ -e $f ] && printf "%s:\t" $f && ls -F -l $f | sed -s 's/   */  /g'
+done
+###
+
+### options
+for f in respawn pause pause-wait ; do
+  [ -f $f ] && printf "option:\t%s\n" $f
+done
+
+### first word
+for f in nice uid gid sleep maxwait sync alarm pidfile \
+         sysvinit-timeout; do
+  if [ -f $f ] ; then
+	read ans < $f
+	printf "%s:\t%s\n" $f $ans
+  fi
+done
+
+### text files:
+for f in params environ softlimit wait cron depends; do
+  if [ -f $f ] ; then
+	printf "\n$cstart%s$cend: ==>\n" $f
+	cat $catopt $f
+	printf '<==\n'
+  fi
+done
+
+### dirs:
+for f in depends.dir; do
+  if [ -d $f ] ; then
+	printf "\n$cstart%s$cend:\n" $f
+	ls -la $f
+  fi
+done
+
+shift
+done

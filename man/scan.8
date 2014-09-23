@@ -1,0 +1,99 @@
+.TH ninit\-scan 8 "Jan 19, 2010"
+.SH NAME
+ninit\-scan \- scan directory and start/stop services
+.SH SYNOPSIS
+.B ninit\-scan
+[
+.B \-[uod]
+] 
+.I services_directory
+.I ninit_home
+.
+.SH DESCRIPTION
+.B ninit\-scan
+scans  a  directory  to start/stop a collection of services.  
+ 
+Service definitions are installed, configured and activated  as  subdi-
+rectories  of the 
+.I services_directory.  
+As ninit\-scan sequentially scans the 
+.I services_directory, 
+it looks for subdirectory names not beginning with `.'.   If
+ninit\-scan then finds the `sticky' bit set on the subdirectory, 
+it considers the service definition ``active'' and 
+attempts to start/stop the corrsponding service.
+
+            
+
+.SH OPTIONS
+If no option is given 
+.B ninit\-scan 
+try to start the service in respawn ON or OFF mode
+depending on the existence of the file 
+.B respawn
+in the service subdirectory.
+
+.TP
+.B \-u
+Up.
+If the service is not running, start it.
+If the service stops, restart it. 
+.TP
+.B \-o
+Once.
+If the service is down, start it.
+If the service stops, do not restart it.
+.TP
+.B \-d
+Down.
+If the service is running, send it a TERM signal and then a CONT signal.
+After it stops, do not restart it.
+
+.SH EXAMPLES
+
+.B ninit\-scan \-u net /etc/ninit
+.br
+start all services /etc/ninit/net/* which have `sticky' bit set
+in respawn mode.
+
+.B ninit\-scan etc /etc/ninit
+.br
+start all services /etc/ninit/etc/* which have `sticky' bit 
+set.
+
+.B ninit\-scan \-d '' /etc/ninit
+.br
+stop all services /etc/ninit/* which have `sticky' bit set.
+
+.SH USAGE
+
+This is similar to the file 
+.I depends.  
+Put in 
+.I rsetup
+the following:
+
+.B #!/bin/sh
+.br
+.B exec $2/bin/ninit\-scan $1 $2
+
+
+The program is shell script.  See the code to understand how it works.
+.B ninit\-scan
+is designed to permit easy service activation/deactivation  using
+the chmod(1) utility.
+You can set/unset `sticky' bit with
+
+
+chmod +t myservice 
+.br
+chmod \-t myservice 
+
+.SH AUTHOR
+Nikola Vladov.
+Thanks to Wayne Marshall for the `sticky' bit idea.
+.br
+.I http://b0llix.net/perp/
+
+.SH SEE ALSO
+ninit(8), nsvc(8), perpd(8), chmod(1)

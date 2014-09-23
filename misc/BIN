@@ -1,0 +1,48 @@
+v:1:::::
+d:::755:::
+d:::755:/etc::
+d:::755:/etc/ninit::
+
+# d:::755:/etc/ninit/bin::
+# g:::755:/etc/ninit/bin/::
+# x:::::argv0::
+# x:::::env::
+# x:::::conditional-init::
+# x:::::sleeprun::
+# x:::::install-bin::
+# x:::::serdo::
+# x:::::ninit-huge::
+# x:::::ninit-mmap::
+# x:::::ninit-conf:scripts/conf:
+# x:::::ninit-scan:scripts/scan:
+
+g:::600:/etc/ninit/::
+x:::644::.sync:Version:
+x:::644::.nsvc_help:nsvc_help:
+p:::::in:
+p:::::out:
+
+d:::755:/bin::
+x:::755:/bin/:nsvc::
+
+d:::755:/sbin::
+g:::755:/sbin/::
+x:::::ninit-reload:reload:
+x:::::ninit-reboot:reboot:
+x:::::ninit-pidfile:pidfile:
+x:::::ninit-sysvinit:sysvinit:
+x:::::ninit-runlevel:runlevel:
+x:::::bootlog::
+x:::::pututmpid::
+x:::::nkillall::
+x:::::ninit-shutdown:shutdown:
+c:::::ninit-inittab:inittab:
+c:::::ninit-service:scripts/service:
+
+d:::755:/etc/ninit/sys::
+g:::755:/etc/ninit/sys/::
+x:::::run::
+x:::::run-wait:wait:
+x:::::update::
+x:::::remove::
+x:::::procfs::

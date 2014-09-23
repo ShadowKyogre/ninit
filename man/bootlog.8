@@ -1,0 +1,89 @@
+.TH bootlog 8 "Dec 28, 2009"
+.SH NAME
+bootlog \- write stdout/stderr of a program to file
+.SH SYNOPSIS
+.B bootlog
+[-12ctar] logsize logfile program [arguments]
+
+.SH DESCRIPTION
+.B bootlog
+is used to start a program and write stdout/stderr to a disk file.
+This works also before mouning any file systems.
+
+.B bottlog
+is designed to log the output of scripts/services at boot time,
+before mounting any file system.  This is typical for
+system init.
+
+.B bootlog 
+expects that when the program exits, the
+.I logfile 
+is writable!
+
+.SH OPTIONS
+.TP
+\-1
+log only stdout
+.TP
+\-2
+log only stderr;  default is to log stdout and stderr
+.TP
+\-c
+create logfile
+.TP
+\-t
+truncate logfile
+.TP
+\-a
+append to logfile
+.TP
+\-r
+replace old
+.I logfile
+with
+.I logfile~
+.TP
+.I logsize
+maximal size of output to be logged
+.TP
+.I logfile
+disk file name
+.TP
+.I program
+the name of the 
+.I program 
+to start 
+.TP
+.I arguments
+additional arguments for
+.I program
+
+.SH WARNING
+Use the option \-c to force creating of the 
+.I logfile.
+
+Actually the options \-c, \-a, \-t add O_CREAT, O_APPEND, O_TRUNC
+flags to open(2) for
+.I logfile
+
+.SH EXAMPLE
+bootlog -ctr 120000 /tmp/.sysinit.log /etc/rc.d/rc.sysinit
+
+You will have the files
+.I /tmp/.sysinit.log 
+and
+.I /tmp/.sysinit.log~
+
+.SH ENVIRON
+.B bootlog 
+uses the variable PATH to start 
+.I program  
+.br
+If PATH is undefined it uses PATH=/bin:/usr/bin
+
+.SH AUTHOR
+.B bootlog
+is part of ninit package written by Nikola Vladov
+
+.SH "SEE ALSO"
+ninit(8), open(2)

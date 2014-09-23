@@ -1,0 +1,178 @@
+.TH ninit 8 "Jan 15, 2010"
+.SH NAME
+ninit \- a UNIX process no 1
+.SH SYNOPSIS
+.B ninit 
+[\-Mnumber] [\-Hhome] [\-Ssystem] [service] ...
+
+.SH DESCRIPTION
+.B ninit
+is a possible first process the kernel starts.  It can
+start/stop/monitor all services the OS needs.
+
+To use ninit as system init, first read available documentation in 
+.I http://riemann.fmi.uni-sofia.bg/ninit/
+and then add the parameter 
+\fIinit=/sbin/ninit\fR
+to your kernel command line.
+
+If you want to use ninit
+only to start/monitor services and continue to use 
+the default init(8) then put in 
+.I /etc/inittab 
+.br
+.B NI:12345:respawn:/sbin/ninit
+.br
+In this case you should remove the service 
+.B sysvinit
+and don't use the programs:
+ninit\-runlevel(8), ninit\-sysvinit(8).
+Similarly it is possible to start ninit using
+.B /etc/init.d/ninit
+script.
+
+
+.SH USAGE
+.B ninit 
+will by default do nothing except start the ninit 
+service defined in
+.I /etc/ninit/default
+which usually contains a file named
+.I depends
+specifying which services are to be started at bootup.
+
+To control ninit use the companion program 
+.B nsvc.
+Do not make it SUID unless you know what are you doing!
+
+The program
+.B ninit\-sysvinit
+listens to the fifo
+.I /dev/initctl
+and allows SysVinit programs
+shutdown, halt, reboot, telinit to work properly.
+If there is a service
+.I /etc/ninit/sysvinit
+it starts 
+.B ninit\-sysvinit.
+
+
+To stop the box running 
+.B ninit
+use the programs 
+.B ninit\-shutdown
+or
+.B nsvc.
+
+.SH "NONROOT USAGE"
+Any nonroot user can use 
+.B /sbin/ninit
+to start/monitor own services.  First make private 
+ninit directory with
+.br
+.B /etc/ninit/bin/ninit\-conf ~/.ninit
+.br 
+and put somewhere in shell profile:
+.B export NINIT_HOME=~/.ninit
+
+Then create some services in $NINIT_HOME and start
+.br
+.B /sbin/ninit -H$NINIT_HOME
+
+.SH OPTIONS
+.TP
+.B \-Mnumber
+Tells ninit to use 
+.B number
+bytes for memory buffer.  One service uses approximately 30 bytes.
+.TP
+.B \-Hhome
+Changes the ninit home.  Default: 
+.I /etc/ninit
+.TP
+.B \-Ssystem
+Changes the ninit system directory.  Default:
+.I sys
+
+.SH SIGNALS
+On receiving of some signals 
+.B ninit
+starts appropiate service. 
+
+.TP
+.B SIGINT
+Normally the kernel sends this signal to ninit when CTRL-ALT-DEL is
+pressed. It activates the \fIctrlaltdel\fP action and ninit
+starts the service 
+.I ctrlaltdel
+.TP
+.B SIGWINCH
+The kernel sends this signal when the \fIKeyboardSignal\fP key is hit.
+It activates the \fIkbrequest\fP action
+and ninit starts the service 
+.I kbreq
+.TP
+.B SIGHUP
+Has the same effect as telinit q.
+Ninit restarts the service 
+.I levelQ
+.TP
+.B SIGUSR1
+On receipt of this signal, ninit closes and re-opens its control fifo,
+.I /dev/initctl. 
+Useful for bootscripts when /dev is remounted.
+.TP
+.B SIGPWR
+Ninit starts the service 
+.I powerS.  
+This service starts the program
+.B ninit-sysvinit
+with one argument: powerS.
+
+.SH SERVICES
+Each service has own subdirectory in 
+.I /etc/ninit/
+three.  There are lots of config files for a service.
+The main daemon
+.B ninit
+check only the files 
+.I depends, sync, respawn, end
+to start a service.
+Check olso the link:
+.br
+.I http://riemann.fmi.uni-sofia.bg/ninit/files.html
+ 
+If the servive name start with '#' or '\-' it is blacklisted.
+You can now blacklist services temporarily by passing it on
+the kernel command line.  The first time they are to be started
+will then be skipped.  Use this, for example, to not start the dhcp
+client when your notebook is not plugged in a network.
+Look in ninitfeatures.h if ninit is compiled to use this option.
+
+.SH FILES
+.I NINIT_HOME/in
+.br
+.I NINIT_HOME/out
+.br
+.I NINIT_HOME/sys/
+.br
+.I /dev/initctl
+
+
+.SH AUTHOR
+ninit was written by Nikola Vladov and can be downloaded from
+.I http://riemann.fmi.uni-sofia.bg/ninit/
+
+.SH SEE ALSO
+nsvc(8), ninit-service(8), ninit-reload(8)
+.br
+ninit-shutdown(8), ninit-reboot(8), nkillall(8)
+.br
+ninit-sysvinit(8), ninit-runlevel(8)
+.br
+minit(8), 
+.I http://www.fefe.de/minit/
+.br
+init(8), shutdown(8), halt(8), reboot(8)
+
+Part of this manpage was written by Erich Schubert.

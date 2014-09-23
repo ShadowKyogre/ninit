@@ -1,0 +1,73 @@
+.TH pututmpid 8 "Dec 28, 2009" 
+.SH NAME
+pututmpid \- write utmp/wtmp records and exec command
+.SH SYNOPSIS
+.B putupmpid
+.I [-w]
+.I ut_id
+.I command
+.I [parameters]
+.br
+.B pututmpid
+.I reboot
+.br
+.B pututmpid
+.I halt
+
+
+.SH DESCRIPTION
+.B pututmpid
+is used to write records in utmp/wtmp files for running 
+getty/agetty/fgetty.
+pututmpid writes the record and then execve()s a command.
+The commands 
+.B login 
+and 
+.B getty
+use the records written from pututmpid.
+
+After reboot it is possible to set 
+.B pututmpid reboot
+in init scripts.
+This will update /var/run/utmp with BOOT_TIME record.  This
+must be done after /var/run/utmp is writable.  The usage of
+.B pututmpid halt
+is similar.  It sets wtmp record (in /var/log/wtmp file).
+
+.SH OPTIONS
+usually pututmpid is symlinked as \fIrun\fR command of a service.
+.TP
+.B \-w
+debug mode -- write more info in /var/log/wtmp
+.TP
+.B ut_id
+string at most 4 bytes long.  examples: tty1,tty2, vc1,vc2,vc3...
+Use different names for each virtual console!
+.TP
+.B command
+the real command to start
+.TP
+.B parameters
+additional parameters for the command
+
+.SH EXAMPLE
+A typical use of this command will look like this:
+.TP
+/etc/ninit/getty/2
+.TP
+/etc/ninit/getty/2/params
+tty2
+.br
+/sbin/fgetty
+.br
+tty2
+.TP
+/etc/ninit/getty/2/run
+-> /sbin/pututmpid
+
+.SH "SEE ALSO"
+ninit(8), ninit\-runlevel(8)
+.br
+getty(8), {n|f|a|min}getty(8),
+.br
+login(1), utmp(5), runlevel(8)

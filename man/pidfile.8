@@ -1,0 +1,75 @@
+.TH ninit\-pidfile 8 "Dec 28, 2009"
+.SH NAME
+ninit\-pidfile \- work around daemons that always fork
+.SH SYNOPSIS
+.B ninit\-pidfile
+.I servicename
+.I pidfile
+[
+.I -H home
+]
+.I command
+.I [parameters]
+
+.SH DESCRIPTION
+.B ninit\-pidfile
+is used to work around daemons that insist on forking into the background,
+but that do write a correct pid file.
+
+.B ninit\-pidfile 
+forks the actual service, then waits for the pidfile to
+be written. Once it can read the pid from the pidfile it will tell
+ninit the real pid and quit.
+
+.SH OPTIONS
+.TP
+.I servicename
+the name of the service
+ninit\-pidfile is installed for
+.TP
+.I pidfile
+the filename to read the pid from
+.TP
+.I command
+the real command to start
+.TP
+.I parameters
+additional parameters for the command
+.TP
+.B \-H \fIhome\fR
+.br
+the home of ninit.  Default: /etc/ninit
+
+.SH USAGE
+With
+.B ninit 
+you can prepare a service and if it forks and writes
+the PID in some file then type in the service directory:
+
+	echo /path/to/deamon.pidfile > 
+.I pidfile
+
+For apache this looks like:
+
+	cd /etc/ninit/apache
+.br
+	echo /var/run/apache.pid > 
+.I pidfile
+
+Don't use hard or soft links here!  
+.br
+Then 
+.B ninit 
+will start apache using 
+.B ninit\-pidfile
+
+.SH AUTHOR
+.B pidfilehack
+was written 
+by Felix von Leitner.
+
+This manpage was written by Erich Schubert <erich@debian.org>
+for the Debian GNU/Linux operating system.
+
+.SH "SEE ALSO"
+ninit(8), nsvc(8), pidfilehack(8)

@@ -1,0 +1,18 @@
+#!/bin/sh
+
+if test "$1" = "" ; then
+   echo usage: $0 /dir/name
+   exit 100
+fi
+
+mkdir -m 755 $1 || exit 1
+cd $1 || exit 2
+
+mkfifo -m 600 in || exit 3
+mkfifo -m 600 out || exit 4
+
+ln -s /etc/ninit/sys sys || exit 5
+ln -s /etc/ninit/.sync .sync || exit 6
+ln -s /etc/ninit/.nsvc_help .nsvc_help || exit 7
+
+ls -laF .

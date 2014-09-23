@@ -1,0 +1,34 @@
+#!/bin/sh
+## *setup:	$1=service  S2=ninit_home  $3=ninit_sys  $4=pid
+##    end:	$1=service  S2=ninit_home  $3=ninit_sys
+
+op=''
+case $1 in
+    -u) op=u; shift; break;;
+    -o) op=o; shift; break;;
+    -d) op=d; shift; break;;
+esac
+
+if test $# -lt 2 ; then
+    echo 'usage: ninit-scan [ -[uod] ] service ninit_home'
+    exit 1
+fi
+
+cd $2 || exit 2
+
+if test "$1" = "" ; then
+    prefix=''
+else
+    cd $1 || exit 3
+    prefix=$1/
+fi
+
+for d in * ; do
+    if test -d $d -a -k $d ; then
+	x=$op
+	if test "$x" = "" ; then
+	    test -f $d/respawn && x=u || x=o
+	fi
+	/bin/nsvc -$x $prefix$d
+    fi
+done

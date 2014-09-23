@@ -1,0 +1,1 @@
+OPTIMIZATION = -fomit-frame-pointer -mpreferred-stack-boundary=2 -falign-functions=1 -falign-jumps=1 -falign-loops=1

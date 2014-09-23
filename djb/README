@@ -1,0 +1,2 @@
+ninit uses small string/buffer operations.
+In most cases they are less than 15 bytes.

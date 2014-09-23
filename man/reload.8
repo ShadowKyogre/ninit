@@ -1,0 +1,120 @@
+.TH ninit-reload 8 "Dec 28, 2009"
+.SH NAME
+ninit\-relaod \- replace running ninit with a new version
+.SH SYNOPSIS
+.B ninit\-reload 
+[options] [/path/to/ninit] [ninit_options]
+
+.SH DESCRIPTION
+.B ninit\-reload
+is used to replace a running ninit with a new version.
+
+It tries to retrieve the state information about running services from
+ninit, then have ninit replace itself with the new version and
+restore the stored state information.
+
+.SH OPTIONS
+Unless the \-u option is given, ninit\-reload assumes you are running
+in test mode.
+.TP
+\-v
+verbose operation
+.TP
+\-u
+update mode
+.TP
+\-m
+dump ninit memory buffer to stdout
+.TP
+\-d
+dump services data to stdout
+.TP
+\-R
+.I service
+.br
+remove 
+.I service
+from active list
+.TP
+\-r
+.I number
+.br
+remove 
+service with
+.I number
+from active list.  Example:
+.RS
+	ninit\-reload -v /sbin/ninit
+.br
+	ninit\-reload -v -r 3 -R qmail -u /sbin/ninit
+.RE
+.TP
+\-e
+.I string
+.br
+update ninit environ.  Example: 
+.br
+.B ninit\-reload -v -e ABC=12 -e UVW -u /sbin/ninit
+.br
+This updates the variable 
+.B ABC 
+and removes 
+.B UVW.
+See the environ after that with:
+.B tr '\\\\000' '\\\\012' < /proc/1/environ 
+.TP
+\-E
+.I file
+.br
+update ninit environ using
+.I file.
+The syntax for 
+.I file 
+is the same as in the file 
+.I environ
+for services.
+.TP
+\-a
+.I number
+.br
+reload ninit and calculate memory buffer to 
+.I number
+additional services.  Check the result with:
+.B ps axww.
+.TP
+\-t
+.I time_diff
+.br
+add 
+.I time_diff 
+seconds to each service.  Useful if you change the time with hwclock.
+.I time_diff 
+can also be a negative number.
+.TP
+\-f 
+.I data_file
+.br
+don't retrieve services from ninit.  Use this file instead.
+For example you can start:
+.PP
+.RS
+	ninit-reload -d > /tmp/ninit.data
+.br
+	ninit-reload -v -u -f /tmp/ninit.data /sbin/ninit
+.RE
+.PP
+
+.SH "ENVIRON"
+.B ninit\-reload
+uses the variables 
+.B NINIT_MEMORY 
+and 
+.B NINIT_HOME. 
+
+
+.SH AUTHOR
+This manpage was partially written by Erich Schubert <erich@debian.org>
+for the Debian GNU/Linux operating system.
+
+.SH "SEE ALSO"
+ninit(8), nsvc(8)

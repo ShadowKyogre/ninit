@@ -1,0 +1,59 @@
+.TH ninit\-reboot 8 "Dec 28, 2009"
+.SH NAME
+ninit-reboot \- reboot your system immediately
+.SH SYNOPSIS
+.B ninit\-reboot
+.I RESTART
+.br
+.B niniy\-reboot
+.I HALT
+.br
+.B ninit\-reboot
+.I POWER_OFF
+.br
+.B ninit\-reboot
+.I ENABLE_CAD
+.br
+.B ninit\-reboot
+.I DISABLE_CAD
+
+.SH DESCRIPTION
+.B ninit\-reboot
+is used to reboot your system.
+
+It will not shut down services, unmount filesystems or notify
+your users, but expects that this has already been done when it
+is called.
+
+.SH USAGE
+
+To prevent accidential use of this application the parameters have to
+be written in uppercase letters.
+.TP 10
+.I RESTART
+restart (reboot) the system
+.TP
+.I HALT
+halt the kernel
+.TP
+.I POWER_OFF
+power off the system if possible (supported by hardware)
+.TP
+.I ENABLE_CAD
+halt the system.  Enable CTRL\-ALT\-DEL key to restart the system
+after halt.
+.TP
+.I DISABLE_CAD
+halt the system.  Disable CTRL\-ALT\-DEL key to restart the system
+after halt.
+
+
+
+.SH AUTHOR
+ninit\-reboot was contributed by Tommi Virtanen.
+
+This manpage was partially written by Erich Schubert <erich@debian.org>
+for the Debian GNU/Linux operating system.
+
+.SH "SEE ALSO"
+ninit(8), nsvc(8), ninit\-shutdown(8), nkillall(8)

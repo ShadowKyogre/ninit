@@ -1,0 +1,5 @@
+#ifndef INT_DEFS_H
+#define INT_DEFS_H
+typedef unsigned Z uint32t;
+typedef Z int32t;
+#endif

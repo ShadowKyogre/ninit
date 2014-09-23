@@ -1,0 +1,46 @@
+.TH ninit\-service 8 "Dec 28, 2009"
+.SH NAME
+ninit\-service \- print info about a service
+.SH SYNOPSIS
+.B ninit\-service
+[-OPTIONS] service(s)
+.br
+.B ninit\-service
+-E service file
+.
+.SH DESCRIPTION
+.B ninit\-service
+is a shell script which prints info about service(s).
+It only looks in the service directory.
+Use 
+.B nsvc
+to obtain info about services loaded in ninit memory.
+
+.SH OPTIONS
+.TP
+\-A ascii output
+.TP
+\-C show end of lines;  for cat
+.TP
+\-L print long lines;  for ls
+.TP
+\-E 
+.I service file
+.br
+edit service/file;  
+default editor: /bin/vi;  change it with: 
+.br
+echo /usr/bin/emacs -nw > /etc/ninit/.editor
+.TP
+\-H/other/home   
+default home: /etc/ninit
+
+.SH EXAMPLE
+.B ninit\-service 
+ngetty
+.br
+.B ninit\-service 
+`find /etc/ninit/ -type d`
+
+.SH "SEE ALSO"
+ninit(8), nsvc(8), ngetty(8)

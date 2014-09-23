@@ -1,0 +1,23 @@
+usage: nsvc [-Sservice] -[uodpchaitkgrWRDHLCEZV] service(s)
+       nsvc -Ppid service
+ -u	up	start service with respawn;	also -un
+ -o	once	start service without respawn;	also -on
+ -d	down	set respawn off, stop service
+ -R|r	respawn	set on|off
+ -p	pause	send SIGSTOP
+ -c	cont	send SIGCONT
+ -h	hangup	send SIGHUP
+ -a	alarm	send SIGALRM
+ -i	intr	send SIGINT
+ -t	term	send SIGTERM
+ -k	kill	send SIGKILL
+ -g	get	output just the PID
+ -Z	Zero	free service;	also -Zn
+ -E	update ninit environ;	also -En
+ -D	list dependencies
+ -Wn	wait n secs service to finish
+ -H	print last n services
+ -L	list services
+ -Ctime	set CRON of service;	also -C+time
+ -Ppid	set PID of service
+ -Ssrv	skip service

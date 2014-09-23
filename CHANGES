@@ -1,0 +1,129 @@
+0.14:   2010-01-19 00:27:01
+  added nkillall.8  
+  gid is not default anymore.  see ninitfeatures.h
+  uid supports 22:33:100:200:300
+  nkillall: \e escape
+  shutdown: set cron off
+  nkillall: signals with letters like nsvc
+  shutdown and nkillall: makes more sync(2), flag -q
+  added THANKS ;-)
+  added helpers: remove procfs;  thanks to them snvc is smaller
+  nsvc options -onumber -unumber; option -E
+  Cron has option -C
+  /etc/ninit/.nsvc_help
+  nsvc, shutdown, reload uses variables NINIT_MEMORY and NINIT_HOME
+  nsvc: option -S
+  shutdown: option -s
+  manpages for all programs in /sbin ;-)
+  update manpages (Boris Grozev)
+  Makefile: man_txt
+  serdo.c: read only one file again
+  better sleep in open_inout.h
+  serdo.c improvments; buildin: killall5, simple echo
+  nsvc.c: -C+number
+  scripts/conf
+  ninit.8: NONROOT USAGE, using /sbin/init with ninit
+  ninit-scan: (Wayne Marshall)
+
+0.13.7:   2009-12-16 10:47:50
+  bootlog.c (flush_root)
+  0.13.1.4 renamed to 0.13.2
+  service start 'end' (if it exixts; X_OK) after finishing
+  fixed a bug in shutdown.c (thx to Jan)
+  With flag -s ninit-shutdown don't start halt and reboot services
+  shutdown.c:  improvements; flags -S -q
+  shutdown.c:  removed flags -s -q; new flags -E -v -T
+  added nkillall
+  shutdown.c:  options -m and -E work together
+  nkillall print escape like echo
+
+0.13.1:   2009-06-27 12:59:38
+  updated bootlog
+  Makefile logs 'make tests' in tests_log using boolog
+  fixing quotes in serdo
+
+0.13:   2009-01-10 18:11:42
+  it's possible to set parameters in wait.  example: some_service:180:3
+  install-bin print help and string errors
+  better sync mode.  maxsync is removed.  echo 200 > sync
+  updated scripts/ninit_test.sh
+  comments (#) in depends, params, environ, wait, softlimit
+  install-bin (verbose mode)
+  nsvc -V
+  errmsg_put.c; buffer_*.c
+  setup, rsetup, sys-rsetup starts with args: $1=service $2=service_pid
+  EXTRACT_* trick (automatic create header files)
+  stuct process is 20 bytes on x86_64 (see struct_root.h)
+  changed BIFFER_INIT macro
+  utmp_io.c
+  Makefile: install_other
+  serdo is intslled only with: make install_other
+  t_write.h uses PIPE_BUF (thx Laurent Bercot)
+  nsvc.8 improvements
+  ninit_test.sh creates services in ./etc/ninit/
+  ninit-huge
+  added printf.c and ninit.spec
+  make FLAG_DEBUG=no
+  removed flag X_OK in some syscalls access.
+  better addprocess
+
+0.12.1:   2008-01-03 17:15:08
+  ninit-depends.  convert directory to file (depends.dir -> depends)
+  removed unused stat.h in headers
+  updated serdo (static)
+  two environ vars: NINIT_HOME, INIT_HOME.  (Thanks to Stamatis Mitrofanis)
+  ninit logo: /etc/ninit/.sync
+  install-bin uses chown32 instead chown on some systems
+  err.c and err_b.c uses the macros va_start and va_arg
+  fu.c (u &= 0xffffffff)
+
+0.12:
+  almost all arrays are moved in stack.  small data and bss sections.
+  assembler functions (i386) for some DJB functions.
+  modifications in Makefile.
+  100 Euro security guarantee.
+
+0.11.2:
+  ninit-reload accept agument -e (change environ) -E file_env
+  program ~/sys/update
+  service flags: pause, pause-wait
+  service flag cron:  a:b[:c]
+    can contain many lines.
+  flag -K for nsvc.
+  pidfilehack --> ninit-pidfile.
+  make i386 -- build static daemons (don't use dietlibc)
+  Makefile is smaller and simpler
+  gcc-4.1.2 works now.
+  install-bin
+  stuct mem in initialized in the main program.
+
+0.11.1:
+  ninit-reload accepts args (-r3 -r5 -r33 ...)
+  ninit-inittab sets the variables NINIT_RUNLEVEL, INIT_VERSION
+  if /etc/minit/{in|out} FIFO's exist then make symbolic links.
+  new run flags: sys-rsetup, pidfile
+  if the service sysvinit exist, ninit create /dev/initctl 
+  ninit-reload and nsvc checks for environ NINIT_HOME
+  nsvc -[drR] ALL - change all services.
+    Change service ALL with: nsvc -[drR] ops ALL
+  new program: ninit-sysvinit.  configuration file: sysvinit-timeout
+    fimeout[:fork-mode].  example:  echo 600:0 > sysvinit-timeout
+  ninit catch signal SIGPWR
+  new run flags: alarm, maxsync
+  nsvc output is different
+  shell script ninit-service
+  new program run-wait
+
+0.11:
+  Sun Jun 17 22:08:22 EEST 2007
+  I decided to rename all without changes.
+  The name ninit must be spelled nano-init.
+
+0.9.11:
+  rewritten by Nikola Vladov
+
+0.9.1:
+  fix embarassing typo in msvc (Gelu G. Lupas)
+
+0.9:
+  See minit CHANGES - http://www.fefe.de/minit

@@ -1,0 +1,155 @@
+.TH ninit-sysvinit 8 "Dec 28, 2009"
+.SH NAME
+ninit-sysvinit \- SysVinit emulator listening on /dev/initctl
+.SH SYNOPSIS
+.B ninit-sysvinit
+.br
+.B ninit-sysvinit
+powerS
+
+.SH DESCRIPTION
+.B ninit
+does not use the
+.I /dev/initctl
+fifo.  As a result the SysVinit commands
+telinit, reboot, halt, shutdown do not work.
+Some of them need to write to 
+.I /dev/initctl
+to work properly.
+
+.B ninit-sysvinit
+is a SysVinit emulator which listens on
+.I /dev/initctl
+and starts some services if there is any activity on the fifo.
+
+.SH USAGE
+Five seconds after starting all services
+.B ninit
+tries to start the sysvinit service.
+If the last service exists then 
+.B ninit
+opens and listens on
+.I /dev/initctl. 
+.B  Never include 
+the service sysvinit in 
+.I /etc/ninit/default
+nor start it at boot time.
+
+.SH OPTIONS
+.B ninit\-sysvinit
+reads the control file
+.I sysvinit\-timeout
+in the service directory.
+It must contain two numbers n1:n2.
+If there is not
+any activity  on 
+.I /dev/initctrl  
+for more than n1 seconds
+the program exits.
+If the number n1 is zero
+.B ninit\-sysvinit
+wait forever.
+
+If needed, 
+.B ninit
+can start
+.B ninit\-sysvinit
+later again.
+
+.SH RUNLEVELS
+SysVinit has runlevels 0123456S.  The command
+.br
+.B telinit S
+.br
+writes the request to
+.I /dev/initctl
+and 
+.B ninit\-sysvinit
+starts the service 
+.I levelS.
+It works similarly with telinit 5, telinit Q or telinit U.
+Then
+.B ninit\-sysvinit
+starts the 
+.I level5,
+.I levelQ 
+or 
+.I levelU 
+service if it exists.
+
+.SH "POWER ACTIONS"
+.B ninit\-sysvinit
+also starts the services
+.I powerF,
+.I powerO 
+or
+.I powerL.
+The letters come from F(AIL), O(K) or L(OW).  
+The program can obtain the power request from
+.I /dev/initctl
+or from a SIGPWR signal and the file
+.I /etc/powerstatus.
+See the manual page init(8) for more info.
+
+.SH SIGNALS
+Don't send signal SIGPWR to
+.B ninit\-sysvinit.
+Manpage init(8) says:
+
+
+Usage of SIGPWR and 
+.I /etc/powerstatus 
+is discouraged. Someone wanting to
+interact  with  init  should use the 
+.I /dev/initctl 
+control channel.
+
+If some program still needs to use signal SIGPWR
+it must send it dirrectly to
+.B ninit.
+
+.SH ENVIRON
+SysVinit 
+.B shutdown
+sets the variable 
+INIT_HALT=POWERDOWN 
+or
+INIT_HALT=HALT 
+depending on the options
+\-r \-h \-H \-P.  You can (re)set this variable
+using:
+
+.B nsvc -E INIT_HALT
+.br
+.B nsvc -E INIT_HALT=POWERDOWN
+
+.SH "AUTHOR"
+If you don't plan to use SysvInit's shutdown, reboot,
+halt or telninit commands, you can do:
+
+.B cd /etc/ninit
+.br
+.B mv sysvinit sysvinit_
+.br
+.B ninit\-reload \-v \-u /sbin/ninit
+
+Why did I write this SysVinit 
+.B emulator?  
+This is a good question.
+Ninit has the ninit-shutdown, nkillall and ninit-reboot programs.  There
+is no need to use SysVinit halt, reboot... to stop the box clean.
+See the code of the emulator.  Maybe you will find the answer there.
+
+Nikola Vladov
+
+.SH FILES
+.I /dev/initctl
+.br
+.I /etc/powerstatus
+.br
+.I NINIT_HOME/sysvinit/sysvinit\-timeout
+
+.SH SEE ALSO
+nsvc(8), ninit-shutdown(8), ninit-runlevel(8)
+.br
+init(8), shutdown(8), halt(8), reboot(8), telinit(8)

@@ -1,0 +1,240 @@
+.TH nsvc 8 "Jan 19, 2010"
+.SH NAME
+nsvc \- control ninit
+.SH SYNOPSIS
+.B nsvc
+[ -Sservice ]
+[
+.B \-[uodgpchaitkorRDCLHVWZE]
+] 
+.I service
+[\fI...\fR]
+.br
+.B nsvc  -Ppid
+.I service
+.
+.SH DESCRIPTION
+.B nsvc
+is the management interface to ninit.
+.I service
+is the service directory name relative to /etc/ninit.  
+You can also include /etc/ninit/ in the service name.
+.PP
+Each service directory contains control files.
+They are described on 
+.I http://riemann.fmi.uni-sofia.bg/ninit/
+
+.PP
+It is possible to make nsvc SUID.
+.PP
+.RS
+.B chown root.root /bin/nsvc
+.br
+.B chmod 4711 /bin/nsvc
+.RE
+.PP
+Then nsvc opens the pipes
+.IR /etc/ninit/in , 
+.I /etc/ninit/out 
+and switches to real UID.
+If UID is nonzero only limited set of operation are allowed.
+.
+.SH OPTIONS
+If no options are given,
+.B nsvc
+will just print a diagnostic message to stdout, saying if the
+service is up, down or finished, which PID it has if it is up, and for
+how long it has been in this state.
+
+Only the service name 
+.B ALL 
+means all services.
+
+.TP
+.B \-Sservice
+Skip service.  Apply this option immediately after
+.B nsvc.  
+Don't insert space between S and service.
+Examples:
+.br
+.B nsvc
+\-Sngetty \-Ssshd \-Slogger \-d ALL
+.br
+.B nsvc
+\-Sngetty \-W3 ALL || 
+.B nsvc
+\-Sngetty \-k ALL
+
+.TP
+.B \-u \-uNumber
+Up.
+If the service is not running, start it.
+If the service stops, restart it.  If
+.B Number
+is nonzero and the service is down start it after
+.B Number
+seconds.
+.TP
+.B \-o \-oNumber
+Once.
+If the service is down, start it.
+If the service stops, do not restart it.
+If
+.B Number
+is nonzero and the service is down, start it after
+.B Number
+seconds; if it is up, restart it later.
+.TP
+.B \-d
+Down.
+If the service is running, send it a TERM signal and then a CONT signal.
+After it stops, do not restart it.
+.TP
+.B \-r
+Stop respawn.  
+Set respawn flag to OFF.  This does not start/stop the service.
+.TP
+.B \-R
+Start respawn.  
+Set respawn flag to ON.  This does not start/stop the service.
+.TP
+.B \-p
+Pause.
+Send the service a STOP signal.
+.TP
+.B \-c
+Continue.
+Send the service a CONT signal.
+.TP
+.B \-h
+Hangup.
+Send the service a HUP signal.
+.TP
+.B \-a
+Alarm.
+Send the service an ALRM signal.
+.TP
+.B \-i
+Interrupt.
+Send the service an INT signal.
+.TP
+.B \-t
+Terminate.
+Send the service a TERM signal.
+.TP
+.B \-k
+Terminate.
+Send the service a KILL signal.
+.TP
+.B \-g 
+Get.  Output just the PID.
+.TP
+.B \-Ppid \fIservice\fR
+Set pid of service.
+.TP
+.B \-D \fIservice\fR
+Print dependencies.
+This will print all the names of all the services that were started
+because this services depended on them.  Example:
+.br
+.B nsvc -D default
+.TP
+.B \-D
+Print ninit memory usage statistics.
+.TP
+.B \-H
+Print history.
+This will print the names of some recently spawned processes.
+This is useful if you see a process looping (initialization fails and
+ninit is restarting it all the time).
+.TP
+.B \-L
+Print all services loaded in memory.
+.TP
+.B \-V
+Print version
+.TP
+.B \-Wnumber
+Wait at most 
+.B number
+seconds service(s) to finish.  Example:
+.br
+.B nsvc \-d qmail
+.br
+.B nsvc \-W180 qmail || nsvc -k qmail
+.TP
+.B \-Cnumber \-C+number
+Tell ninit that the service is in CRON mode.
+If 
+.B number 
+is zero it disables CRON mode.  Let now=`date +%s`.
+If 
+.B number < now 
+then ninit starts the service immediately,
+otherwise ninit will start it latter.  
+The flag
+.B \-C+number
+(if the
+.B number 
+is positive)
+is equaivalent to the following:
+.br
+.B t=`expr now + number`
+.br
+.B nsvc -C$t ...
+
+To stop foo,
+which is in CRON mode do:
+.br
+.B nsvc -C0 foo
+.br
+.B nsvc -d foo
+.br
+.\" To see the next CRON timestamp of foo type:
+.\" .B nsvc foo
+.TP
+.B \-Z \-Znumber
+Zero (free) a service.  This is done with the ninit-reload program.
+Example:
+.br
+.B nsvc -Z30 foo
+.br
+This removes foo (if such a service exists)
+and prepares ninit to accept 30 new services approximately.
+.TP
+.B \-E \-Enumber
+Update ninit environ.  This is done by ninit-reload program.
+Example: 
+.br
+.B nsvc \-E36 ABC=12 UVW
+.br
+This updates the variable 
+.B ABC 
+and removes 
+.B UVW.
+It prepares ninit to accept 36 new services approximately.
+See the environ with:
+.br
+.B tr '\\\\000' '\\\\012' < /proc/1/environ 
+
+.
+.SH "RETURN CODES"
+Generally, 
+.B nsvc 
+returns zero if everything is OK or 1 on error (could not
+open /etc/ninit/in or /etc/ninit/out or there is no process with the
+given name).  In diagnostic mode, it will exit 0 if the service is up, 2
+if it is down or 3 if it is finished.
+
+.
+.SH "ENVIRON"
+.B nsvc
+uses the variables 
+.B NINIT_MEMORY 
+and 
+.B NINIT_HOME. 
+
+.SH "SEE ALSO"
+ninit(8), ninit-scan(8)
+.br
+ninit-shutdown(8), nkillall(8), svc(8), msvc(8)

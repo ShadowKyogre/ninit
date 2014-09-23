@@ -1,0 +1,25 @@
+#!/bin/sh
+[ $# -lt 2 ] && exit 1
+
+export PATH=/bin:/usr/bin
+name=`echo $1 | sed -e 's/\./__DOT__/g' -e 's/\//__SLASH__/g'`
+shift
+
+echo '#ifndef' AUTO_FILE__$$__$name
+echo '#define' AUTO_FILE__$$__$name
+echo '/*   '`date`'   */'
+
+while test $# -gt 0; do
+  case $1 in
+    -L*) echo $1 | sed -e 's/^../#include  "/' -e 's/$/"/' ; shift;;
+    -G*) echo $1 | sed -e 's/^../#include  </' -e 's/$/>/' ; shift;;
+    -I*) echo $1 | sed -e 's/^../#include  /'; shift;;
+    *) break;;
+  esac
+done
+
+if [ $# -gt 0 ] ; then
+    sed -n -e 's/\(.*\) \/\*EXTRACT_INCL\*\/.*/extern \1;/p' \
+    -e 's/ \/\*EXTRACT_UNMOD\*\/.*//p' $@
+fi
+echo '#endif'

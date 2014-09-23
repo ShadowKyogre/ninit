@@ -1,0 +1,55 @@
+#	-*-Makefile-*-
+CC = gcc
+CFLAGS = -Os -W -Wall
+
+ifeq ($(FLAG_DEBUG),no)
+CCC_ = @echo '	CC $<';
+else
+CCC_ =
+endif
+
+CCC = $(CCC_) $(CC) $(CFLAGS) $(OPTIMIZATION)
+
+NINIT_O=fork.o waitpid.o __waitpid.o wait4.o \
+ nanosleep.o time.o __time.o gettimeofday.o \
+ close.o open.o getpid.o access.o execve.o ioctl.o write.o \
+ dup2.o fcntl.o poll.o chdir.o kill.o read.o lseek.o mmap.o \
+ munmap.o symlink.o rt_sigaction.o rt_sigprocmask.o \
+ SYS_reboot.o SYS_mknod.o
+
+RUN_O=setuid.o setgid.o SYS_setgroups.o \
+ writev.o getppid.o setsid.o \
+ alarm.o __alarm.o settimer.o \
+ readlink.o nice.o __nice.o getpriority.o setpriority.o
+
+RUN_WAIT_O=setrlimit.o getrlimit.o flock.o
+NSVC_O=getuid.o geteuid.o
+OTHER = unlink.o sync.o rename.o pipe.o uname.o \
+ SYS_chown.o chmod.o mkdir.o umask.o fsync.o \
+ __errno.o __environ.o __errno_location.o SYS_brk.o __sbrk.o
+
+ALL = $(NINIT_O) $(RUN_O) $(RUN_WAIT_O) $(NSVC_O) $(OTHER)
+
+start.o: system.a
+
+__%.o: ../__%.c
+	$(CCC) -c -o $@ $<
+
+start.o: start.S
+	$(CCC) -c -include ../features.h $<
+unified.o: unified.S
+	$(CCC) -c -include ../features.h $<
+%.o: %.S
+	$(CCC) -c -include ./syscalls.h $<
+
+SYS_%.S:
+	@( echo '#ifdef __NR_'$*; \
+	   echo 'syscall_weak('$*,SYS_$*,$*')'; \
+	   echo '#endif' ) > $@
+%.S:
+	@( echo '#ifdef __NR_'$*; \
+	   echo 'syscall('$*,$*')'; \
+	   echo '#endif' ) > $@
+
+clean:
+	rm -rf *.o *.a SYS_*.S

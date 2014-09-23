@@ -1,0 +1,139 @@
+.TH nkillall 8 "Dec 28, 2009"
+.SH NAME
+nkillall \- send signals to all processes;  write messages to users
+.SH SYNOPSIS
+.B nkillall
+-[vq] [-s secs] [-M|W mesg] [-signum] [-E prog [arg[s]]
+.SH DESCRIPTION
+.B nkillall
+sends signals
+to all processes skipping it's own PID.  
+It is a simple program that does not use \fI/proc\fR FS.
+It uses kill(2) and execve(2) syscalls.  It is designed as
+a replacement of the SysVinit killall5(8) command.
+
+.SH USAGE
+It is not allowed to use
+.B \-h
+(signal SIGHUP) as first option!  If you really want this then start:
+.B nkillall
+\-s0 \-hup ...
+
+.TP
+.B \-v 
+verbose mode;  \-vv means more verbose
+.TP
+.B \-q
+quiet mode;  ignores SIGINT signal;  Ctrl-C does't work!
+.TP
+.B \-s 
+\fIsecs\fR 
+.br
+sleep \fIsecs\fR
+.TP
+.B \-M 
+\fImesg\fR
+.br
+write \fImesg\fR to stdout.  The message can include escape
+symbols: 
+\\NNN, \\a, \\b, \\e, \\c, \\f, \\n, \\r, \\t, \\v, \\\\
+like in C language.  Last message can be written again with
+\-M% or \-W%.  Example:
+
+.B nkillall
+\-M'\\n\\aPlease logout!  The system is going down...' \\
+         \-W% \-s2 -W% \-s4 \-W% \-s12 \\
+         \-M'\\tSending TERM signal' \-term ...
+.TP
+.B \-W
+\fImesg\fR
+.br
+write \fImesg\fR to all logged users.  The syntax is the same as \-M.
+.B nkillall
+determines logged users by looking at
+.I /var/run/utmp.
+
+.br
+In my opinion 
+.I /var/run/utmp
+is unreliable!
+Other programs like who(1), wall(1), login(1) also use this file.
+If you feel that yours is insecure, better don't use the \-W option.
+
+.TP
+.B \-signum
+send all processes the singal \fIsignum\fR.  
+Some important signals can be encodded.  For example SIGTERM can be typed with
+\-15 or \-term.
+Only the first letter is important!
+The command
+.B kill \-l
+lists the signal numbers.
+.TP
+.B \-E
+.I /path/to/program [arg[s]]
+.br
+execve(2) the program with some arguments.
+This option must be last!  The program will have the same PID as
+.B nkillall.
+
+.SH NOTE
+The options are applied immediately.  Their position is important.
+The next two examples work differently:
+
+nkillall \-q -s2 \-M'sending signal SIGTERM' \-15 ...
+.br
+nkillall \-s2 \-M'sending signal SIGTERM' \-15 \-q ...
+
+Use the options \-v[v] \-q after 
+.B nkillall
+immediately.
+
+.SH WARNING
+.B nkillall
+also kills the script in which it is included.
+Use it in scripts like:
+
+#!/bin/sh
+.br
+before commands
+.br
+exec nkillall [options] \-E/path/to/prog prog_opt(s)
+
+An example of wrong usage is the following:
+
+#!/bin/sh
+.br
+before commands
+.br
+nkillall ...
+.br
+after commands
+
+.SH EXAMPLES
+.B nkillall
+\-M'Sending all processes SIGTERM ...' \-s2 \-15 \\
+.br
+         \-M'Sending all processes SIGKILL ...' \-s6 \-9 \\
+.br
+         \-s1 \-E /path/to/program arg1 arg2 ...
+
+.B nkillall 
+\-v \-s1 \-15 \-cont \-s6 \-kill \-s1 \-E/path/to/prog arg(s) ...
+
+.B nkillall 
+\-vv \-pause \-s59 \-continue \-M'Hello world!'
+
+.SH FILES
+.I /var/run/utmp
+
+.SH AUTHOR
+.B nkillall
+is included in ninit package and can be downloaded from
+.br
+.I http://riemann.frmi.uni-sofia.bg/ninit/
+
+.SH "SEE ALSO"
+ninit(8), kill(1), kill(2), execve(2), utmp(5) 
+.br
+init(8), killall5(8)

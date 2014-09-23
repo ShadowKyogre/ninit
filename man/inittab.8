@@ -1,0 +1,98 @@
+.TH ninit\-inittab 8 "Dec 28, 2009"
+.SH NAME
+ninit\-inittab \- convert /etc/inittab to service directory
+.SH SYNOPSIS
+.B ninit\-inittab
+.I inittab_file
+.I home_directory
+.I output_script
+
+.SH DESCRIPTION
+.B ninit\-inittab
+creates a script using 
+.I /etc/inittab 
+file.
+This script can be used to create a service directory easy.
+
+.SH OPTIONS
+.TP
+.I inittab_file
+input source file 
+.TP
+.I home_directory
+home directory for 
+.B ninit
+.TP
+.I output_script
+name of the output script
+
+.SH USAGE
+.B Case A.
+If you don't have services in
+.I /etc/ninit
+you can start:
+
+.PP
+.RS
+cd /tmp
+.br
+ninit\-inittab
+/etc/inittab /etc/ninit services.sh
+.br
+less services.sh
+.br
+/tmp/services.sh
+.RE
+.PP
+
+Then check what the script has done in 
+.I /etc/ninit
+
+.B Case B.
+If you already have a 
+.I /etc/ninit
+directory with services,
+and don't want to make any changes there you can type:
+
+.PP
+.RS
+cd /tmp; cp /etc/inittab /tmp; vi inittab
+.br
+ninit\-inittab
+/tmp/inittab /tmp/srv services.sh
+.br
+less services.sh
+.br
+/tmp/services.sh
+.RE
+.PP
+
+Then check what the script has done in 
+.I /tmp/srv.
+If you find something
+interesting there you can copy it to 
+.I /etc/ninit
+
+.SH AUTHOR
+.B ninit\-inittab
+was written by Nikola Vladov.
+
+The aim was to easily convert a host running
+SysVinit to ninit.  In my opinion creating services is very easy.
+Maybe you have to look 
+in some already prepared service directory first.
+
+Ask google for "ninit archlinux" and you will find
+an excellent git repository with services for
+.I /etc/ninit 
+
+
+.SH FILES
+.I /etc/inittab
+.br
+.I /etc/ninit/
+
+.SH "SEE ALSO"
+ninit(8), ninit\-runlevel(8), ninit\-sysvinit(8), pututmpid(8)
+.br
+init(8), inittab(5), runlevel(8)

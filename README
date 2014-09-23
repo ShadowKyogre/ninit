@@ -1,0 +1,213 @@
+See also: http://riemann.fmi.uni-sofia.bg/ninit/
+
+Each service gets its own directory under /etc/ninit (change this in the
+source, it's a #define right at the start of ninitfeatures.h).
+
+
+Each service directory can contain the following files/symlinks:
+
+  depends
+
+    a plain text file containing a service name per line.
+    Example: /etc/ninit/sshd/depends could contain "network".
+    Each of these services will be started before this service is
+    started.  If you need to wait for static initializations to
+    complete, use the sync flag.  See also the wait flag below.
+
+  run
+
+    a symbolic link to the program name.  No hard link, because argv[0]
+    for the programs is created by extracting the part after the last
+    slash in the contents of the symbolic link.
+    Example: "/usr/bin/sshd" would be run with argv[0]="sshd".
+
+  end
+
+    similar to run.  After the service finish "end" will be executed.
+    The helper does not set environ, softlimit, uid/gid restrictions.
+    You can put there for example:
+	#!/bin/sh
+	exec /bin/nsvc -o service_name
+    Use this option instead of sync or wait mode.  Let for example
+    services B,C,D must be started after A finish.  There are two
+    possible solutions:
+    Bad:  start A in sync mode
+    Good: start A i normal mode and put in "end"
+	#!/bin/sh
+	exec /bin/nsvc -o B C D
+
+  params
+
+    a plain text file containing command line parameters for the
+    service, one parameter per line.  No shell expansion is done.  If
+    you need shell expansion, have run point to a shell script instead
+    of the real daemon.  Note: Have the shell script exec the daemon
+    instead of simply running it to save system resources.
+
+  environ
+
+    similar to params.  run appends contents of this file to the environ.
+    If the first line has zero length, unset all environ.
+    If a line does not have '=' (HOME), unset this variable.
+
+  wait
+
+    similar to params.  /etc/inint/run waits for services included in 
+    this file to finish and after that start a current service.
+    Include wait services also in depends.  This is different from sync.
+    Let a service B must be started after a service A finish.
+    One can sync A.  This will block all other services.
+    In this case it's better to use wait instead of sync.
+    It's possible to set wait parameters (see maxwait) at the end of
+    each entry.  Example: some_service:180:3
+
+  maxwait
+
+    a plain text file containing the values n1:n2.  Wait no more 
+    than n1 sec a service for finish.  See wait.  Default is 600 sec.  
+    The value n1=0 means -- wait until the service finish.
+
+
+  softlimit
+ 
+    see DJB program softlimit.  Similar to params.  Lines
+    with the same options as softlimit (skip leading '-').  Example:
+    echo m300000 > softlimit; echo o30 >> softlimit
+
+  respawn
+
+    touch this file to make ninit respawn the process when it dies.
+    This should be touched for getty and network servers.
+
+  sync
+
+    touch this file to make ninit wait until the service ends.  sync is
+    mutually exclusive with respawn.  This is meant for static
+    initializations like "ifconfig".  See also wait.
+    If sync contains a nonzero number n ninit will wait max n sec
+    the service to finish.  If it does not ends until n secs then 
+    ninit continues to work.  Example: echo 600 > sync
+
+  log
+
+    if this directory exists, it is taken as service and ninit creates
+    a named pipe log/in and soft link of log/in to out.  If the log 
+    service can not be started, this service will block if it writes 
+    to stdout.
+
+  nice
+
+    a plain text file containing the value to add to the nice level
+    via the nice system call.
+
+  sleep
+
+    a plain text file containing the value n.  sleep n secs after fork
+    before running child.	
+
+  in
+
+    this file(named pipe) is used for stdin.
+
+  out
+
+    this file(named pipe) is used for stdout and stderr.
+    e.g. a symlink to /dev/null
+
+  gid 
+    
+    a plain text file containing a number.
+    Exec the program with this GID.  Example echo -n 234 > gid
+    To activate this feature edit the file ninitfeatures.h 
+    and install the package again.
+
+  uid 
+    
+    exec the program with this UID.  It can contain also UID:GID
+    It is possible to write here also the supplementary groups.
+    For example echo 23:99:240:320:100 > uid start the service with:
+    UID=23, GID=99, GROUPS=99,240,320,100.
+
+  setup
+
+    if this file exist it is started just before run in sync mode.
+    If uid/gid or softlimit exist they are applied first and 
+    after that setup is executed.
+  
+  rsetup
+
+    similar to setup.  It is executed before setup as root and
+    not softlimit, uid/gid, in/out restrictions.  If you
+    want to create/modify params, wait, depends... see sys-rsetup flag.
+
+  sys-rsetup
+
+    similar to setup.  It is executed first as root.
+    It can be used to create/modify params, wait, depends...
+
+  pidfile
+
+    easy method to setup services which run in background.
+    Prepare them as ordinary services and write the name of the pidfile.
+    Don't use link here!
+    Example: echo -n /var/run/gpm.pid > pidfile
+    
+  alarm
+
+    a plain text file containing a number n.
+    Do alarm(n) before starting the child.
+
+  pause
+
+    if this file exist run selfkills with SIGSTOP signal.
+
+  pause-wait
+
+    if this file exist run-wait selfkills with SIGSTOP signal.
+
+  cron
+
+    a plain text file containing lines with numbers a:b[:c]
+    for each line run wait find a solution of 
+	cron = 60 * (a*x+b) > now  (x is integer)
+    The smallest cron is next cron-start for this service.
+    The number a=10080 (24*60*7) is special.  For example 10080:25
+    means: Sunday 00:25:00 UTC
+
+ninit will try to run the command line arguments as services.  The
+kernel passes its arguments to init.  That means you can for example
+have a service /etc/ninit/sos-shell that starts a /bin/sh and then use
+LILO to boot "bzImage sos-shell".  ninit will then run that service.
+If none of the services worked (or none were given), ninit will spawn
+the service "default".  The normal way to configure ninit is to have
+default be an empty service and just list all the services you want
+ninit to start at boot time in default/depends.
+
+Other special services (besides "default") are "ctrlaltdel" and "kbreq".
+ctrlaltdel will be run when the console user presses ctrl-alt-del and is
+meant to reboot the computer.  kbreq is the keyboard request, which
+can be mapped using loadkeys.  On my box, it is on Alt+Arrow-Up.  I use
+it to shut down the computer.
+
+--------------------------
+Memory allocation in NINIT.  ninit uses only alloca for RAM.
+
+One service = 21 + strlen(service_name).  Example getty/1 is 28 bytes.
+If you need to load more than 50 services then use at boot process 
+something like:
+	/sbin/ninit -M3200
+
+after reload/reboot ninit will work with 3200 bytes buffer.
+default buffer is 1536.  Good for 50-60 services.
+If someone uses more than 50 services let me know.
+
+--------------------------
+After building a new ninit test/install it with:
+	ninit-reload -v -u /path/to/new/ninit [-M2000]
+	cp /path/to/new/ninit /sbin/ninit
+	ninit-reload -v -u /sbin/ninit [argv1 argv2 ...]
+some of argvs can be -M2000 or -M3200 ...
+
+There is no need of reboot!  Dump memory buffer with:
+	ninit-reload -m > /tmp/ninit.mem
+	less /tmp/ninit.mem

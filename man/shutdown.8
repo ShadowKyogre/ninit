@@ -1,0 +1,89 @@
+.TH ninit-shutdown 8 "Dec 28, 2009"
+.SH NAME
+ninit-shutdown \- shutdown the ninit init system.
+.SH SYNOPSIS
+.B ninit-shutdown 
+\-[\fIrhoqvstmST\fR] [\-E /path/to/program [arg1 arg2 ...]]
+
+.SH DESCRIPTION
+.B ninit-shutdown
+tries to properly shutdown your system with ninit.
+
+.SH USAGE
+.TP 9
+\-r
+reboot after shutdown
+.TP
+\-h
+halt after shutdown
+.TP
+\-o
+power-off after shutdown (default)
+.TP
+\-q
+quiet mode;  ignores SIGINT signal;  Ctrl-C does't work!
+.TP
+\-v
+be verbose
+.TP
+\-m
+only shutdown the ninit-part and exit
+.TP
+\-s \fIsecs\fR 
+starting delay
+.TP
+\-t \fIsecs\fR
+delay between SIGTERM and SIGKILL
+.TP
+\-E \fIprog\fR
+execute \fIprog\fR after KILLALL;  must be the last option!
+.TP
+\-T \fIsecs\fR
+if \fIsecs\fR is nonzero shutdown twice ninit part
+.TP
+\-S \fIabcd\fR
+skip to shutdown the service \fIabcd\fR
+
+.SH NOTES
+If the flags -m and -E are off then the program starts the service
+.I halt 
+or 
+.I reboot 
+depending of the flags -h -o  and -r respectively.
+
+If the flags -E and -m are on then 
+.B ninit-shutdown 
+execve(2)s the
+\fIprog\fR after shutting down the ninit-part.
+
+If the flag -E is on and the flag -m is off then 
+.B ninit-shutdown
+execve(2)s
+the \fIprog\fR after sending SIGTERM and SIGKILL to all processes.
+
+.B ninit-shutdown
+clears respawn/cron flags on all services
+including those skipped with -S flag.
+
+.
+.SH "ENVIRON"
+.B ninit-shutdown
+uses the variables 
+.B NINIT_MEMORY 
+and 
+.B NINIT_HOME. 
+
+.SH AUTHOR
+.B ninit 
+was written by Nikola Vladov and can be downloaded from
+.br
+.I http://riemann.frmi.uni-sofia.bg/ninit/
+
+Parts of
+.B ninit-shutdown
+were contributed by Bernd Wachter.
+.br
+Parts of this manpage was written by Erich Schubert.
+
+.SH "SEE ALSO"
+ninit(8), nsvc(8), execve(2), nkillall(8)
