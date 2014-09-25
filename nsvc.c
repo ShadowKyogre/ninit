@@ -12,7 +12,7 @@
 
 extern int ioctl();
 
-static char **Names_skip, **NamesX, *buf, *initroot, *nsvc_other, respmode;
+static char **Names_skip, **NamesX, *buf, *initroot, *initsysdir, *nsvc_other, respmode;
 static int NamesI, do_update, tty = -111;
 
 static void e(int n) { buffer_flush(buffer_1); _exit(n); }
@@ -247,6 +247,7 @@ int main(int argc,char *argv[]) {
   errmsg_iam("nsvc");
   infd = -1; outfd = -1;
   INIT_ENV_GET_HOME(initroot,"NINIT_HOME","INIT_HOME");
+  INIT_ENV_GET_HOME(initsysdir,"NINIT_SYSDIR","INIT_SYSDIR");
 
   Names_skip = alloca(argc * sizeof(char *));
   for (skp=Names_skip; (x=argv[1]); argv++) {
@@ -259,6 +260,7 @@ int main(int argc,char *argv[]) {
     int uid=getuid(), euid=geteuid();
     if (initroot && (uid != euid)) { ops: die_xx("\ago away!"); }
     if (initroot==0) initroot=INITROOT;
+	if (initsysdir==0) initsysdir=INITSYSDIR;
 
     if (argv[1] == 0) { setuid(uid); goto REMOVE; }
     open_inout(initroot);
@@ -300,7 +302,7 @@ int main(int argc,char *argv[]) {
     ret=fmt_service(i,0);
     
     if (i >= 0 && tty && root[i].pid > 1) {
-      INIT_ARGS2(argv, "./sys/procfs", fu(root[i].pid));
+      INIT_ARGS2(argv, "./procfs", fu(root[i].pid));
       goto PROCFS;
     }
   } else {
@@ -323,11 +325,11 @@ int main(int argc,char *argv[]) {
       case 'E':
       case 'Z':
       REMOVE:
-	argv[0] = "./sys/remove";	/* XXX: make sys as environ! */
+	argv[0] = "./remove";	/* ~~XXX: make sys as environ!~~ */
       PROCFS:
 	close_inout();
 	buffer_flush(buffer_1);
-	ret = chdir(initroot);
+	ret = chdir(initsysdir);
 	if (!ret) ret=execve(argv[0], argv, environ);
 	break;
       default:
