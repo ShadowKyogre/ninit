@@ -111,7 +111,12 @@ int main(int argc, char **argv) {
     
     /* Put the OS version in place of the hostname */
     if (uname(&uname_buf) == 0)
-      str_copyn(u.ut_host, uname_buf.release, 32); /* XXX overflow ? - Very slim, see uname(2) and utmp(5) */
+      str_copyn(u.ut_host, uname_buf.release, 32); /* XXX overflow ? - 
+                                                      very slim in Linux, 
+                                                      see uname(2) and utmp(5).
+                                                      However, this possibility exists
+                                                      when the uname field length is
+                                                      longer than the host name (not so in Linux) */
  
     if (fd>=0 && lseek(fd,pos,SEEK_SET) == pos)
       utmp_io(fd,&u,F_WRLCK);
