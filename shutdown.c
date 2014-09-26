@@ -40,13 +40,16 @@ static void exec_cmd(char *cmd, ...) {
   const char *s;
   va_list a;
   pid_t pid;
+  int count_args = 0;
   
   *arg++ = cmd;
+  count_args++;
   va_start(a,cmd);
   do {
     s=va_arg(a,const char*);
     *arg++ = (char *)s;
-  } while (s);
+    count_args++;
+  } while (s && count_args < 25);
 
   while ((pid = fork()) < 0) nano_sleep(0,500000000);
   if (pid == 0) {
